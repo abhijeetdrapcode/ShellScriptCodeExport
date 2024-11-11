@@ -9,6 +9,7 @@ read -p "Enter the domain for the API application (e.g., api.example.com): " api
 
 # Set views_path based on project_folder
 views_path="$project_folder/views"
+echo "Views path is: $views_path"
 
 # Function to check if a package is installed and if a newer version is available
 check_and_install_package() {
@@ -76,7 +77,7 @@ else
   echo "Node.js is already installed."
 fi
 
-# Install PM2 if not installed  
+# Install PM2 if not installed
 if ! command -v pm2 &> /dev/null; then
   echo "Installing PM2..."
   sudo npm install -g pm2
@@ -134,7 +135,7 @@ update_env_file() {
   sed -i "s|REDIS_HOST=.*|REDIS_HOST=127.0.0.1|" "$env_file"
   sed -i "s|REDIS_PORT=.*|REDIS_PORT=6379|" "$env_file"
   sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=$redis_password|" "$env_file"
-  sed -i "s|BUILD_FOLDER=.*|BUILD_FOLDER=$project_folder|" "$env_file"
+  sed -i "s|BUILD_FOLDER=.*|BUILD_FOLDER=${project_folder}/|" "$env_file"
 }
 
 echo "Updating .env files in exchange-engine and exchange-surface directories..."
@@ -154,5 +155,22 @@ fi
 echo "Generating SSL certificates..."
 sudo certbot --nginx -d "$main_domain"
 sudo certbot --nginx -d "$api_domain"
+
+# Add Nginx configuration from README.md
+echo "Extracting Nginx configuration from README.md..."
+config_file="/etc/nginx/sites-available/custom-domain.conf"
+sed -n '/#### BELOW THIS LINE ####/,/#### ABOVE THIS LINE ####/p' "$project_folder/ReadME.md" | sudo tee "$config_file" > /dev/null
+
+# Create soft-link in sites-enabled
+cd /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/custom-domain.conf .
+
+# Check Nginx configuration
+echo "Testing Nginx configuration..."
+sudo nginx -t
+
+# Restart Nginx
+echo "Restarting Nginx..."
+sudo service nginx restart
 
 echo "Setup completed successfully!"
