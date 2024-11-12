@@ -159,7 +159,8 @@ sudo certbot --nginx -d "$api_domain"
 # Add Nginx configuration from README.md
 echo "Extracting Nginx configuration from README.md..."
 config_file="/etc/nginx/sites-available/custom-domain.conf"
-sed -n '/#### BELOW THIS LINE ####/,/#### ABOVE THIS LINE ####/p' "$project_folder/ReadME.md" | sudo tee "$config_file" > /dev/null
+sed -n '/#### BELOW THIS LINE ####/{n; :a; /#### ABOVE THIS LINE ####/!{p; n; ba}}' "$project_folder/ReadME.md" | sudo tee "$config_file" > /dev/null
+
 
 # Create soft-link in sites-enabled
 cd /etc/nginx/sites-enabled
@@ -172,5 +173,23 @@ sudo nginx -t
 # Restart Nginx
 echo "Restarting Nginx..."
 sudo service nginx restart
+
+# Build and deploy exchange-engine
+FOLDER=exchange-engine
+echo "******* Making Build for $FOLDER *************"
+cd "$project_folder/$FOLDER"
+npm install
+echo "**** Make Build ****"
+npm run build
+pm2 restart ecosystem.config.js
+
+# Build and deploy exchange-surface
+FOLDER=exchange-surface
+echo "******* Making Build for $FOLDER *************"
+cd "$project_folder/$FOLDER"
+npm install
+echo "**** Make Build ****"
+npm run publish
+pm2 restart ecosystem.config.js
 
 echo "Setup completed successfully!"
