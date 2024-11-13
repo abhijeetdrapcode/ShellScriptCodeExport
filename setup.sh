@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Prompt for Redis password, main project folder, main application domain, and API domain
+# Taking user input for Redis password, main project folder, main application domain, and API domain
 read -s -p "Enter the password you want to set for Redis: " redis_password
 echo
 read -p "Enter the path to the main project folder: " project_folder
 read -p "Enter the domain for the main application (e.g., example.com): " main_domain
 read -p "Enter the domain for the API application (e.g., api.example.com): " api_domain
 
-# Set views_path based on project_folder
+# Setting the views_path according to project_folder
 views_path="$project_folder/views"
 echo "Views path is: $views_path"
 
-# Function to check if a package is installed and if a newer version is available
+# Function to check if a package is already installed and then ask the user if he wants to uprade the package if a newer version is available or not 
 check_and_install_package() {
   local package=$1
   if dpkg -l | grep -q "$package"; then
@@ -26,7 +26,7 @@ check_and_install_package() {
   fi
 }
 
-# Update System
+# Updating the System
 echo "Updating system packages..."
 sudo apt update -y
 sudo apt upgrade -y
@@ -44,7 +44,7 @@ check_and_install_package libasound2
 check_and_install_package libatk-bridge2.0-0
 check_and_install_package libgtk-3-0
 
-# Install missing library for MongoDB
+# Installing missing library for MongoDB
 echo "Checking and installing MongoDB dependencies..."
 wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.23_amd64.deb
 sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.23_amd64.deb
@@ -64,7 +64,7 @@ if ! systemctl is-active --quiet mongod; then
   sudo systemctl start mongod
 fi
 
-# Install Node.js if not installed
+# Installing Node.js if not installed
 if ! command -v node &> /dev/null; then
   echo "Installing Node.js..."
   sudo apt-get install -y ca-certificates curl gnupg
@@ -77,7 +77,7 @@ else
   echo "Node.js is already installed."
 fi
 
-# Install PM2 if not installed
+# Installing PM2 if not installed
 if ! command -v pm2 &> /dev/null; then
   echo "Installing PM2..."
   sudo npm install -g pm2
@@ -85,11 +85,11 @@ else
   echo "PM2 is already installed."
 fi
 
-# Install Certbot and SSL library if not installed
+# Installing Certbot and SSL library if not installed
 check_and_install_package certbot
 check_and_install_package python3-certbot-nginx
 
-# Install and configure Redis if not installed
+# Installing and configure Redis if not installed
 if ! command -v redis-server &> /dev/null; then
   echo "Installing Redis server..."
   sudo apt install redis-server -y
@@ -102,7 +102,7 @@ echo "Configuring Nginx..."
 sudo rm -rf /etc/nginx/sites-available/default
 sudo rm -rf /etc/nginx/sites-enabled/default
 
-# Create required directories
+# Creating required directories
 echo "Creating required directories..."
 sudo mkdir -p /efs/project-build
 sudo chmod -R 777 /efs
