@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"cbb75a52caf94706a90dc6e102d60451","collectionName":"loan_status_badges","type":"collection"}
