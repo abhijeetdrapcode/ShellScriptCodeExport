@@ -10,7 +10,7 @@ if [[ ! -d "$main_folder" ]]; then
     exit 1
 fi
 
-zip_files=($(find "$main_folder" -maxdepth 1 -name "*.zip"))
+zip_files=($(find "$main_folder" -maxdepth 1 -name "*.zip" | sort))
 
 if [[ ${#zip_files[@]} -eq 0 ]]; then
     echo "Error: No zip files found in the given folder."
@@ -32,11 +32,10 @@ if [[ ! "$zip_choice" =~ ^[0-9]+$ ]] || (( zip_choice < 1 )) || (( zip_choice > 
 fi
 
 selected_zip="${zip_files[$((zip_choice-1))]}"
-
 zip_name=$(basename "$selected_zip" .zip)
 
-mkdir -p dump
-
+echo "You selected: $selected_zip"
+``
 mkdir -p dump/"$zip_name"
 
 echo "Extracting $selected_zip to dump/$zip_name..."
@@ -47,8 +46,8 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-echo "Running mongorestore for the extracted dump..."
-mongorestore
+echo "Running mongorestore command for the extracted dump..."
+mongorestore --drop
 
 if [[ $? -ne 0 ]]; then
     echo "Error: Failed to restore MongoDB dump."
